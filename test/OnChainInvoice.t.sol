@@ -162,8 +162,6 @@ contract OnChainInvoiceTest is Test {
         vm.stopPrank();
 
         assert(randomIssuer.balance == beforeBalance + amount);
-
-
     }
 
     function testCannotWithdrawMoreEtherThanBalance() public {
@@ -227,7 +225,7 @@ contract OnChainInvoiceTest is Test {
     }
 
     function testFuzzWithdrawETH(uint256 amount_) public {
-         vm.assume(amount_ > 0 && amount_ <= 10 ether);
+        vm.assume(amount_ > 0 && amount_ <= 10 ether);
 
         //Issuer creates invoice
         vm.startPrank(randomIssuer);
