@@ -147,6 +147,9 @@ contract OnChainInvoiceTest is Test {
         uint256 invoiceId = onchaininvoice.createInvoice(randomClient, amount, description);
         vm.stopPrank();
 
+        //Store before balance
+        uint256 beforeBalance = randomIssuer.balance;
+
         //Client pays invoice
         vm.deal(randomClient, amount);
         vm.startPrank(randomClient);
@@ -157,6 +160,10 @@ contract OnChainInvoiceTest is Test {
         vm.startPrank(randomIssuer);
         onchaininvoice.withdrawEther(amount);
         vm.stopPrank();
+
+        assert(randomIssuer.balance == beforeBalance + amount);
+
+
     }
 
     function testCannotWithdrawMoreEtherThanBalance() public {
@@ -208,5 +215,39 @@ contract OnChainInvoiceTest is Test {
         vm.expectRevert();
         bytes memory payload = abi.encodeWithSignature("nonexistentFunction()");
         (bool success,) = payable(address(onchaininvoice)).call{value: 1 ether}(payload);
+    }
+
+    // Fuzzing testing
+    function testFuzzCreateInvoice(address client_, uint256 amount_, string calldata description_) public {
+        vm.assume(client_ != address(0) && amount_ > 0 && amount_ < 100 ether);
+        uint256 id = onchaininvoice.createInvoice(client_, amount_, description_);
+        assert(onchaininvoice.getInvoice(id).client == client_);
+        assert(onchaininvoice.getInvoice(id).amount == amount_);
+        assert(onchaininvoice.getInvoice(id).status == OnChainInvoice.Status.Pending);
+    }
+
+    function testFuzzWithdrawETH(uint256 amount_) public {
+         vm.assume(amount_ > 0 && amount_ <= 10 ether);
+
+        //Issuer creates invoice
+        vm.startPrank(randomIssuer);
+        uint256 invoiceId = onchaininvoice.createInvoice(randomClient, amount_, description);
+        vm.stopPrank();
+
+        //Store before balance
+        uint256 beforeBalance = randomIssuer.balance;
+
+        //Client pays invoice
+        vm.deal(randomClient, amount_);
+        vm.startPrank(randomClient);
+        onchaininvoice.payInvoice{value: amount_}(invoiceId);
+        vm.stopPrank();
+
+        // Issuer withdraws his current balance
+        vm.startPrank(randomIssuer);
+        onchaininvoice.withdrawEther(amount_);
+        vm.stopPrank();
+
+        assert(randomIssuer.balance == beforeBalance + amount_);
     }
 }

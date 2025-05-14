@@ -16,7 +16,7 @@
 - Cancel invoices (by issuer or admin)
 - Withdraw collected funds safely
 
-Built with **Foundry** and full 100% test coverage (lines, statements, functions, branches), it showcases clean separation of logic, CEI pattern, and robust access control.
+Built with **Foundry**, the project showcases clean separation of logic, CEI pattern, and robust access control — with full 100% test coverage (lines, statements, functions, branches) and fuzzing included.
 
 ---
 
@@ -127,8 +127,8 @@ Prevents accidental ETH transfers or undefined calls.
   - Valid/invalid payments
   - Cancellation logic (issuer/admin)
   - Transfer failure simulation using `RejectETH` contract
-  - Access control reverts
   - Fallback and receive handling
+  - **Fuzz testing** of core logic (e.g. invoice creation) using random inputs
 - ✅ 100% line, function, and branch coverage
 
 ---
